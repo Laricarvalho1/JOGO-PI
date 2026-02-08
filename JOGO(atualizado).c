@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+//#define ARQ_RANKING "ranking.txt"
 
 // Uso do ifdef para funcionar tanto no Windows quanto no Linux
 #ifdef _WIN32
@@ -46,6 +47,11 @@ typedef struct{
 	int qtdExplosiva;
 } Inventario;
 
+//struct do ranking com o nome do jogador e o numero de jogadas
+typedef struct{
+	char nome[50];
+	int jogadas;
+} Ranking;
 
 //LIMPEZA DE CARACTERES RESIDUAIS
 // Para impedir que entradas inválidas sejam lidass
@@ -55,7 +61,7 @@ void limparBuffer(){
 }
 
 // IMPRESSÃO DA MATRIZ DO JOGO
-void imprimirTabuleiro(int mat[6][7]){
+void imprimirTabuleiro(Casa mat[6][7]){
 	int i, j;
 	
 	printf("\n");
@@ -74,7 +80,7 @@ void imprimirTabuleiro(int mat[6][7]){
 		
 		for(j = 0; j < 7; j++){
 
-			if(mat[i][j]jogador == 0){
+			if(mat[i][j].jogador == 0){
 				printf(" . ");
 			} else{
 				// aqui vamos definir o caractere base (X ou O) para os jogadores
@@ -107,7 +113,7 @@ int posicaoValida(int i, int j){
 void explodir(Casa mat[6][7], int r, int c){
 	// a bomba some primeiro, pois nao faz sentido ela continuar ali depois de explodir
 	mat[r][c].jogador = 0;
-	mat[r][c].tipo = TIPO_NORMAL;
+	mat[r][c].tipo = NORMAL;
 
 	// vai percorrer as 8 casas em volta 
 	for(int i = r - 1; i <= r + 1; i++){
@@ -117,12 +123,12 @@ void explodir(Casa mat[6][7], int r, int c){
 
 				// verifica se a peça destruída é explosiva também
 				// se for, explode ela tbm
-				if(mat[i][j].tipo == TIPO_EXPLOSIVA){
+				if(mat[i][j].tipo == EXPLOSIVA){
 					explodir(mat, i, j);
 				} else{
 					// se for peça normal, apaga ela do tabuleiro
 					mat[i][j].jogador = 0;
-					mat[i][j].tipo = TIPO_NORMAL;
+					mat[i][j].tipo = NORMAL;
 				}
 			}
 		}
@@ -180,16 +186,16 @@ int jogo(Casa mat[6][7], int col, int jogador, TipoFicha tipoPeca){
 // VERIFICAÇÃO DE VITÓRIA
 // Essa função vai usar a lógica de verificar as linhas, colunas e diagonais
 // Ela retorna 0 em caso de não haver vitória, 1 se o jogador 1 vencer e 2 se o jogador 2 vencer
-int verificarVitoria(int matriz[6][7]){
+int verificarVitoria(Casa matriz[6][7]){
 	int i, j;
 
 	for(i = 0; i < 6; i++){
 		for(j = 0; j <= 3; j++){ // vai até a coluna 3 para evitar quebrar o código
-			if(matriz[i][j] != 0 && // verifica se não é vazio
-				matriz[i][j] == matriz[i][j+1] &&
-				matriz[i][j] == matriz[i][j+2] &&
-				matriz[i][j] == matriz[i][j+3]){
-					return matriz[i][j]; // retorna quem ganhou
+			if(matriz[i][j].jogador != 0 && // verifica se não é vazio
+				matriz[i][j].jogador == matriz[i][j+1].jogador &&
+				matriz[i][j].jogador == matriz[i][j+2].jogador &&
+				matriz[i][j].jogador == matriz[i][j+3].jogador){
+					return matriz[i][j].jogador; // retorna quem ganhou
 				}
 		}
 	}
@@ -198,11 +204,11 @@ int verificarVitoria(int matriz[6][7]){
 	// Verificando a vertical
 	for(j = 0; j < 7; j++){
 		for(i = 0; i <= 2; i++){ // vai até a linha 2 (i+3) para evitar quebrar o código
-			if(matriz[i][j] != 0 &&
-				matriz[i][j] == matriz[i+1][j] &&
-				matriz[i][j] == matriz[i+2][j] &&
-				matriz[i][j] == matriz[i+3][j]){
-					return matriz[i][j];
+			if(matriz[i][j].jogador != 0 &&
+				matriz[i][j].jogador == matriz[i+1][j].jogador &&
+				matriz[i][j].jogador == matriz[i+2][j].jogador &&
+				matriz[i][j].jogador == matriz[i+3][j].jogador){
+					return matriz[i][j].jogador;
 				}
 		}
 	}
@@ -210,11 +216,11 @@ int verificarVitoria(int matriz[6][7]){
 	// Verificando a diagonal principal
 	for(i = 0; i <= 2; i++){
 		for(j = 0; j <= 3; j++){
-			if(matriz[i][j] != 0 &&
-				matriz[i][j] == matriz[i+1][j+1] &&
-				matriz[i][j] == matriz[i+2][j+2] &&
-				matriz[i][j] == matriz[i+3][j+3]) {
-					return matriz[i][j];
+			if(matriz[i][j].jogador != 0 &&
+				matriz[i][j].jogador == matriz[i+1][j+1].jogador &&
+				matriz[i][j].jogador == matriz[i+2][j+2].jogador &&
+				matriz[i][j].jogador == matriz[i+3][j+3].jogador) {
+					return matriz[i][j].jogador;
 				}
 		}
 	}
@@ -222,17 +228,93 @@ int verificarVitoria(int matriz[6][7]){
 	// verificando a diagonal secundária
 	for(j = 6; j >= 3; j--){
 		for(i = 0; i <= 2; i++){
-			if(matriz[i][j] != 0 &&
-				matriz[i][j] == matriz[i+1][j-1] &&
-				matriz[i][j] == matriz[i+2][j-2] &&
-				matriz[i][j] == matriz[i+3][j-3]) {
-					return matriz[i][j];
+			if(matriz[i][j].jogador != 0 &&
+				matriz[i][j].jogador == matriz[i+1][j-1].jogador &&
+				matriz[i][j].jogador == matriz[i+2][j-2].jogador &&
+				matriz[i][j].jogador == matriz[i+3][j-3].jogador) {
+					return matriz[i][j].jogador;
 				}
 		}
 	}
 
 	return 0; // Se chegar aqui, significa que ninguém ganhou ainda
 
+}
+// LÓGICA DO RANKING (ler ranking --> salva atualizado --> decide se jogador entra ou nao)
+
+//leitura do ranking
+void carregarRanking(Ranking hall[3]){//recebe um vetor de 3 posições do tipo ranking
+	FILE *f = fopen("ranking.txt", "r"); //"r" - modo leitura apenas
+
+	if(f == NULL){ //se o arquivo não existir cria um ranking vazio
+		for(int i = 0; i<3; i++){ //percorre as três posições
+			hall[i].jogadas = 42; //numero de jogadas do campeão da posição i
+			strcpy(hall[i].nome, "---");
+		}
+		return;
+	}
+	for(int i = 0; i<3; i++){ //fscanf para leitura formatada
+		if(fscanf(f, "%s %d", hall[i].nome, &hall[i].jogadas)!= 2){//se o fscanf não leu 2 valores (nome e jogadas) então preenche com o padrão (---)
+			hall[i].jogadas = 42;
+			strcpy(hall[i].nome, "---");
+		}
+	}
+	fclose(f);
+}
+
+void salvarRanking(Ranking hall[3]){
+    FILE *f = fopen("ranking.txt", "w");//"w" apaga tudo e escreve novamente, garante atualização constante
+
+    if(f == NULL){
+        printf("Erro ao salvar ranking!\n");
+        return;
+    }
+
+    for(int i = 0; i < 3; i++){
+        fprintf(f, "%s %d\n", hall[i].nome, hall[i].jogadas); //salva já no formato nome + numero de jogadas
+    }
+
+    fclose(f);
+}
+ 
+void atualizarRanking(char nome[], int jogadas){ //parametros recebidos: nome do jogador que venceu e o numero de jogadas feitas
+    Ranking hall[3];
+
+    carregarRanking(hall);
+
+    for(int i = 0; i < 3; i++){ //percorre as três posições
+        if(jogadas < hall[i].jogadas){ //compara 
+
+            for(int j = 2; j > i; j--){ //move os jogadores para baixo
+                hall[j] = hall[j-1];
+            }
+
+            strcpy(hall[i].nome, nome); //insere o novo jogador na posição correta
+            hall[i].jogadas = jogadas;
+
+            salvarRanking(hall); //salva o ranking atualizado no arquivo
+
+            printf("\nVocê entrou no Hall dos Campeões!\n");
+            return;
+        }
+    }
+}
+
+void mostrarRanking(){
+    Ranking hall[3];
+
+    carregarRanking(hall);
+
+    limparTela();
+
+    printf("\n===== HALL DOS CAMPEÕES =====\n\n");
+
+    for(int i = 0; i < 3; i++){
+        printf("%dº Lugar: %s - %d jogadas\n", i+1, hall[i].nome, hall[i].jogadas);
+    }
+
+    printf("\nPressione ENTER para voltar...");
+    getchar();
 }
 
 // MODO 1, JOGADOR X JOGADOR
@@ -280,7 +362,7 @@ void jogadorVsjogador(){
 		// Chama a função jogo com os parâmetros da função JogadorvsJogador
 		// O parâmetro "coluna-1" está sendo usado porque o jogador escolhe colunas de 1 a 7 e...
 		// os índices da matriz vão de 0 até 6, então é feita essa pequena subtração para poder ter uma verificação correta da posição
-		validacao = jogo(matrizJJ,coluna-1,jogadorRodada, NORM);
+		validacao = jogo(matrizJJ,coluna-1,jogadorRodada, NORMAL);
 
 		// VERIFICAÇÃO DA COLUNA
 		if(!validacao){
@@ -306,6 +388,13 @@ void jogadorVsjogador(){
 				jogadorRodada = 1;
 			}
 		}
+		if(vencedor != 0){
+	        char nome[50];
+      		printf("Digite seu nome: ");
+    		gets(nome);
+    		atualizarRanking(nome, totalJogadas);
+}
+
 	}
 
 	limparTela();
@@ -401,7 +490,7 @@ void jogadorVsMaquina(){
 		// Chama a função jogo com os parâmetros da função JogadorvsJogador
 		// O parâmetro "coluna-1" está sendo usado porque o jogador escolhe colunas de 1 a 7 e...
 		// os índices da matriz vão de 0 até 6, então é feita essa pequena subtração para poder ter uma verificação correta da posição
-		validacao = jogo(matrizJM,coluna-1,jogadorRodada);
+		validacao = jogo(matrizJM,coluna-1,jogadorRodada, NORMAL);
 
 		// VERIFICAÇÃO DA COLUNA
 		if(!validacao){
@@ -513,7 +602,7 @@ void MaquinaVsMaquina(){
 		// Chama a função jogo com os parâmetros da função JogadorvsJogador
 		// O parâmetro "coluna-1" está sendo usado porque o jogador escolhe colunas de 1 a 7 e...
 		// os índices da matriz vão de 0 até 6, então é feita essa pequena subtração para poder ter uma verificação correta da posição
-		validacao = jogo(matrizMM,coluna-1,jogadorRodada);
+		validacao = jogo(matrizMM,coluna-1,jogadorRodada, NORMAL);
 
 		// Aqui é para testar a validação da função jogo, caso não tenha espaço na coluna, irá ter esse alerta
 		if(!validacao){
