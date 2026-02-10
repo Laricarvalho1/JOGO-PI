@@ -138,7 +138,11 @@ void explodir(Casa mat[6][7], int r, int c){
 }
 
 // agora precisamos criar essa função para verificar as explosões e fazer cair 
+// precisa procurar as fichas explosivas, se encotrar vai explodir e fazer peças cairem 
 void verificarExplosoes(Casa mat[6][7]){
+	if(explodir(mat, i, j){
+
+	}
 
 }
 
@@ -283,8 +287,8 @@ void atualizarRanking(char nome[], int jogadas){ //parametros recebidos: nome do
     carregarRanking(hall);
 
     for(int i = 0; i < 3; i++){ //percorre as três posições
-        if(jogadas < hall[i].jogadas){ //compara 
-
+        if(jogadas < hall[i].jogadas){ //compara    
+													
             for(int j = 2; j > i; j--){ //move os jogadores para baixo
                 hall[j] = hall[j-1];
             }
